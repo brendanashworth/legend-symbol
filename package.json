@@ -1,6 +1,6 @@
 {
   "name": "@watergis/legend-symbol",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "private": false,
   "dependencies": {
     "@mapbox/mapbox-gl-style-spec": "^13.16.0"
