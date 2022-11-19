@@ -46,7 +46,13 @@ export function exprHandler ({zoom}) {
     else if (typeof(input) === "object") {
       let expr;
       if (Array.isArray(input)) {
-        expr = expression.createExpression(input).value;
+        if (specItem.type === "array") {
+          // Special case: some properties are arrays, which should not be mistaken for expressions. It should be treated as a literal value.
+          return input;
+        }
+        else {
+          expr = expression.createExpression(input).value;
+        }
       }
       else {
         expr = styleFunction.createFunction(input, specItem);

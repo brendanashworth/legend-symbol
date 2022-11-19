@@ -11,8 +11,16 @@ export default function Line (props) {
       8
     )),
     strokeOpacity: expr(layer, "paint", "line-opacity"),
+    strokeDasharray: expr(layer, "paint", "line-dasharray"),
   };
   const sw = style.strokeWidth;
+  let cssStyle = `stroke: ${style.stroke};`
+  if (style.strokeOpacity) {
+    cssStyle += `stroke-opacity: ${style.strokeOpacity};`
+  }
+  if (style.strokeDasharray) {
+    cssStyle += `stroke-dasharray: ${style.strokeDasharray};`;
+  }
 
   return {
     element: "svg",
@@ -59,8 +67,7 @@ export default function Line (props) {
         element: "path",
         attributes: {
           key: "path",
-          style,
-          stroke: style.stroke,
+          style: cssStyle,
           d: "M0 20 L 20 0",
         }
       }
