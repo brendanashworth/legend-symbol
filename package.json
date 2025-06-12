@@ -1,18 +1,17 @@
 {
   "name": "legend-symbol-ts",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "private": false,
   "dependencies": {
     "maplibre-gl": "^5.4.0"
   },
   "source": "src/index.ts",
   "main": "dist/src/index.js",
-  "module": "dist/src/index.modern.js",
-  "unpkg": "dist/src/index.umd.js",
+  "module": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/src/index.modern.js",
+      "import": "./dist/src/index.js",
       "require": "./dist/src/index.js",
       "types": "./dist/src/index.d.ts"
     }
