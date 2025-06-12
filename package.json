@@ -21,10 +21,8 @@
     "registry": "https://npm.pkg.github.com/"
   },
   "scripts": {
-    "build": "./scripts/build",
-    "dev": "./scripts/demo",
-    "type-check": "tsc --noEmit",
-    "prepublishOnly": "npm run type-check"
+    "prepare": "tsc",
+    "postinstall": "tsc"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",
