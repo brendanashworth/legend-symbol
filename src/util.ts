@@ -2,10 +2,18 @@ import {
   expression,
   latest,
   function as styleFunction
-} from '@mapbox/mapbox-gl-style-spec';
+} from '@maplibre/maplibre-gl-style-spec';
 
+import {
+  ExpressionContext,
+  ExpressionHandler,
+  TransformRequestOptions,
+  CacheObject,
+  CancellablePromise
+} from './types';
+import { LayerSpecification } from '@maplibre/maplibre-gl-style-spec';
 
-const PROP_MAP = [
+const PROP_MAP: [string, string?][] = [
   ["background"],
   ["circle"],
   ["fill-extrusion"],
@@ -18,8 +26,8 @@ const PROP_MAP = [
   ["text", "symbol"],
 ];
 
-export function exprHandler ({zoom}) {
-  function prefixFromProp (prop) {
+export function exprHandler({ zoom }: ExpressionContext): ExpressionHandler {
+  function prefixFromProp(prop: string): string | null {
     const out = PROP_MAP.find(def => {
       const type = def[0];
       return prop.startsWith(type);
@@ -27,27 +35,25 @@ export function exprHandler ({zoom}) {
     return out ? (out[1] || out[0]) : null;
   }
 
-  return function (layer, type, prop) {
+  return function (layer: LayerSpecification & { [key: string]: any }, type: 'layout' | 'paint', prop: string): any {
     const prefix = prefixFromProp(prop);
-    const specItem = latest[`${type}_${prefix}`][prop];
+    const specItem = (latest as any)[`${type}_${prefix}`][prop];
     const dflt = specItem.default;
 
     if (!layer[type]) {
-      return  dflt;
+      return dflt;
     }
 
-    const input = layer[type][prop];
+    const input = (layer[type] as Record<string, any>)[prop];
 
     const objType = typeof(input);
-    // Is it an expression...
     if (objType === "undefined") {
       return specItem.default;
     }
     else if (typeof(input) === "object") {
-      let expr;
+      let expr: any;
       if (Array.isArray(input)) {
         if (specItem.type === "array") {
-          // Special case: some properties are arrays, which should not be mistaken for expressions. It should be treated as a literal value.
           return input;
         }
         else {
@@ -61,9 +67,8 @@ export function exprHandler ({zoom}) {
         return null;
       }
 
-      const result = expr.evaluate({zoom}, {});
+      const result = expr.evaluate({ zoom }, {});
       if (result) {
-        // Because it can be a resolved image.
         return (result.name || result);
       }
       else {
@@ -76,9 +81,7 @@ export function exprHandler ({zoom}) {
   }
 }
 
-
-
-export function mapImageToDataURL (map, icon) {
+export function mapImageToDataURL(map: any, icon: string): string | undefined {
   if (!icon) {
     return undefined;
   }
@@ -91,7 +94,7 @@ export function mapImageToDataURL (map, icon) {
   const canvasEl = document.createElement("canvas");
   canvasEl.width = image.data.width;
   canvasEl.height = image.data.height;
-  const ctx = canvasEl.getContext("2d");
+  const ctx = canvasEl.getContext("2d")!;
   ctx.putImageData(
     new ImageData(
       Uint8ClampedArray.from(image.data.data),
@@ -100,14 +103,13 @@ export function mapImageToDataURL (map, icon) {
     0, 0
   );
 
-  // Not toBlob() because toDataURL is faster and synchronous.
   return canvasEl.toDataURL();
 }
 
+const dataStore = new Map<string, CacheObject>();
 
-const dataStore = new Map();
 export const cache = {
-  add: (key, value) => {
+  add: (key: string, value: any): void => {
     if (dataStore.has(key)) {
       throw new Error(`Cache already contains '${key}'`);
     }
@@ -116,16 +118,16 @@ export const cache = {
       count: 1
     });
   },
-  fetch: (key) => {
+  fetch: (key: string): any => {
     const cacheObj = dataStore.get(key);
-    if(cacheObj) {
+    if (cacheObj) {
       cacheObj.count++;
       return cacheObj.value;
     }
   },
-  release: (key) => {
+  release: (key: string): void => {
     const cacheObj = dataStore.get(key);
-    if(!cacheObj) {
+    if (!cacheObj) {
       throw new Error(`No such key in cache '${key}'`);
     }
     cacheObj.count--;
@@ -136,9 +138,9 @@ export const cache = {
   },
 };
 
-function loadImageViaTag (url) {
+function loadImageViaTag(url: string): CancellablePromise<HTMLImageElement> {
   let cancelled = false;
-  const promise = new Promise((resolve, reject) => {
+  const promise = new Promise<HTMLImageElement>((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = "Anonymous";
     img.onload = () => {
@@ -148,28 +150,29 @@ function loadImageViaTag (url) {
       if (!cancelled) reject(e);
     };
     img.src = url;
-  });
+  }) as CancellablePromise<HTMLImageElement>;
+  
   promise.cancel = () => {
     cancelled = true;
   }
   return promise;
 }
 
-function removeUrl (obj) {
-  obj = {...obj};
+function removeUrl(obj: Record<string, any>): Record<string, any> {
+  obj = { ...obj };
   delete obj['url'];
   return obj;
 }
 
-function loadImageViaFetch (url, init) {
+function loadImageViaFetch(url: string, init: RequestInit): Promise<HTMLImageElement> {
   return fetch(url, init)
     .then(res => res.blob())
     .then(blob => URL.createObjectURL(blob))
     .then(url => loadImageViaTag(url));
 }
 
-export function loadImage (url, {transformRequest}) {
-  const fetchObj = {...transformRequest(url)};
+export function loadImage(url: string, { transformRequest }: TransformRequestOptions): Promise<HTMLImageElement> {
+  const fetchObj = { ...transformRequest(url) };
 
   if (fetchObj.headers) {
     return loadImageViaFetch(url, removeUrl(fetchObj));
@@ -179,8 +182,7 @@ export function loadImage (url, {transformRequest}) {
   }
 }
 
-export function loadJson (url, {transformRequest}) {
-  const fetchObj = {...transformRequest(url)};
+export function loadJson(url: string, { transformRequest }: TransformRequestOptions): Promise<any> {
+  const fetchObj = { ...transformRequest(url) };
   return fetch(fetchObj.url, removeUrl(fetchObj)).then(res => res.json());
 }
-

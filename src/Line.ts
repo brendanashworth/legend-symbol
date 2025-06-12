@@ -1,26 +1,22 @@
-export default function Line (props) {
-  const {layer, image, expr} = props;
+import { RendererProps, RenderElement } from './types';
+
+export default function Line(props: RendererProps): RenderElement {
+  const { layer, image, expr } = props;
   const linePatternDataUrl = image(
-    expr(layer, "paint", "line-pattern")
+    expr(layer, "paint", "line-pattern") as string
   );
 
   const style = {
-    stroke: linePatternDataUrl ? `url(#img1)` : expr(layer, "paint", "line-color"),
+    stroke: linePatternDataUrl ? `url(#img1)` : expr(layer, "paint", "line-color") as string,
     strokeWidth: Math.max(2, Math.min(
-      expr(layer, "paint", "line-width"),
+      expr(layer, "paint", "line-width") as number,
       8
     )),
-    strokeOpacity: expr(layer, "paint", "line-opacity"),
-    strokeDasharray: expr(layer, "paint", "line-dasharray"),
+    strokeOpacity: expr(layer, "paint", "line-opacity") as number,
+    strokeDasharray: expr(layer, "paint", "line-dasharray") as string | number[],
   };
+  
   const sw = style.strokeWidth;
-  let cssStyle = `stroke: ${style.stroke};`
-  if (style.strokeOpacity) {
-    cssStyle += `stroke-opacity: ${style.strokeOpacity};`
-  }
-  if (style.strokeDasharray) {
-    cssStyle += `stroke-dasharray: ${style.strokeDasharray};`;
-  }
 
   return {
     element: "svg",
@@ -67,7 +63,12 @@ export default function Line (props) {
         element: "path",
         attributes: {
           key: "path",
-          style: cssStyle,
+          style: {
+            stroke: style.stroke,
+            strokeWidth: style.strokeWidth,
+            strokeOpacity: style.strokeOpacity,
+            strokeDasharray: style.strokeDasharray
+          },
           d: "M0 20 L 20 0",
         }
       }

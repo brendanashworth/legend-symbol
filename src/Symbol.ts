@@ -1,5 +1,7 @@
-function renderIconSymbol ({expr, layer, image}) {
-  const imgKey = expr(layer, "layout", "icon-image");
+import { RendererProps, RenderElement } from './types';
+
+function renderIconSymbol({ expr, layer, image }: RendererProps): RenderElement | null {
+  const imgKey = expr(layer, "layout", "icon-image") as string;
 
   if (!imgKey) {
     return null;
@@ -25,21 +27,20 @@ function renderIconSymbol ({expr, layer, image}) {
   }
 }
 
-function renderTextSymbol ({expr, layer}) {
+function renderTextSymbol({ expr, layer }: RendererProps): RenderElement {
   const textColor = expr(
     layer, "paint", "text-color"
-  );
+  ) as string;
   const textOpacity = expr(
     layer, "paint", "text-opacity"
-  );
+  ) as number;
   const textHaloColor = expr(
     layer, "paint", "text-halo-color"
-  );
+  ) as string;
   const textHaloWidth = expr(
     layer, "paint", "text-halo-width"
-  );
+  ) as number;
 
-  // A "T" shape to signify text
   const d = "M 4,4 L 16,4 L 16,7 L 11.5 7 L 11.5 16 L 8.5 16 L 8.5 7 L 4 7 Z";
 
   return {
@@ -55,9 +56,9 @@ function renderTextSymbol ({expr, layer}) {
           key: "l1",
           d: d,
           stroke: textHaloColor,
-          "stroke-width": textHaloWidth*2,
+          strokeWidth: textHaloWidth * 2,
           fill: "transparent",
-          "stroke-linejoin": "round",
+          strokeLinejoin: "round",
         }
       },
       {
@@ -81,6 +82,6 @@ function renderTextSymbol ({expr, layer}) {
   };
 }
 
-export default function Symbol (props) {
+export default function Symbol(props: RendererProps): RenderElement | null {
   return renderIconSymbol(props) || renderTextSymbol(props);
 }
