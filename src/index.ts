@@ -20,7 +20,6 @@ function extractPartOfImage(img: HTMLImageElement, { x, y, width, height }: { x:
 }
 
 function legendSymbol({ sprite, zoom, layer }: LegendSymbolOptions): RenderElement | null {
-  console.log("layer", layer);
   const TYPE_MAP: Record<LayerSpecification['type'], (props: RendererProps) => RenderElement | null> = {
     "circle": Circle,
     "symbol": Symbol,
