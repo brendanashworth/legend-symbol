@@ -9,7 +9,7 @@ export default function Fill(props: RendererProps): RenderElement {
   const style: Record<string, any> = {
     width: "100%",
     height: "100%",
-    backgroundImage: `url(${dataUrl})`,
+    ...(dataUrl ? { backgroundImage: `url(${dataUrl})` } : {}),
     backgroundColor: expr(layer, "paint", "fill-color") as string,
     opacity: expr(layer, "paint", "fill-opacity") as number,
     backgroundSize: "66% 66%",
