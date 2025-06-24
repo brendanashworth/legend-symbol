@@ -12,7 +12,6 @@ function renderIconSymbol({ expr, layer, image }: RendererProps): RenderElement 
       element: "div",
       attributes: {
         style: {
-          backgroundImage: `url(${dataUrl})`,
           backgroundSize: "contain",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
